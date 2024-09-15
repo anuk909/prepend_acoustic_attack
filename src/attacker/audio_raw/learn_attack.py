@@ -34,7 +34,7 @@ class AudioAttack(AudioBaseAttacker):
         return -1*torch.mean(tgt_probs)
     
 
-    def train_step(self, train_loader, epoch, print_freq=25):
+    def train_step(self, train_loader, epoch, print_freq=1):
         '''
             Run one train epoch - Projected Gradient Descent
         '''
