@@ -3,8 +3,11 @@ import whisper
 import editdistance
 from whisper.tokenizer import get_tokenizer
 
+import getpass
+USERNAME = getpass.getuser()
 
-CACHE_DIR = '/home/sharifm/teaching/tml-0368-4075/2024-spring/students/shmulikcohen/prepend_acoustic_attack/experiments/.cache'
+
+CACHE_DIR = f'/home/sharifm/teaching/tml-0368-4075/2024-spring/students/{USERNAME}/prepend_acoustic_attack/experiments/.cache'
 
 MODEL_NAME_MAPPER = {
     'whisper-tiny'  : 'tiny.en',

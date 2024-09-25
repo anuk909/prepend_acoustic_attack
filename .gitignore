@@ -4,3 +4,6 @@ __pycache__/
 venv/
 librispeech/
 venv/
+CMDs/
+.cache/
+.nfs*
