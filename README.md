@@ -43,6 +43,8 @@ Install all necessary packages by creating a conda environment from the existing
 ```
 conda env create -f environment.yml
 conda activate venv_gector
+### Until we figure out better way to do it:
+pip install -r extra_requirements.txt
 ```
 
 ## Standard Arguments for Attack Configuration
