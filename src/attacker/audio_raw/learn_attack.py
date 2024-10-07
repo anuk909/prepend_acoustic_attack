@@ -72,29 +72,32 @@ class AudioAttack(AudioBaseAttacker):
     @staticmethod
     def _prep_dl(data, bs=16, shuffle=False):
         '''
-        Create batch of audio vectors
+        Create batch of audio vectors using a custom Dataset class to load data on-the-fly
         '''
+        class AudioDataset(torch.utils.data.Dataset):
+            def __init__(self, data):
+                self.data = data
 
-        print('Loading and batching audio files')
-        audio_vectors = []
-        for d in tqdm(data):
-            audio_np = load_audio(d['audio'])
-            audio_vector = torch.from_numpy(audio_np)
-            audio_vectors.append(audio_vector)
-        
-        def pad_sequence(tensors, padding_value=0):
-            max_length = max(len(tensor) for tensor in tensors)
-            padded_tensors = []
-            for tensor in tensors:
-                padded_tensor = torch.nn.functional.pad(tensor, (0, max_length - len(tensor)), value=padding_value)
-                padded_tensors.append(padded_tensor)
-            return padded_tensors
+            def __len__(self):
+                return len(self.data)
 
-        audio_vectors = pad_sequence(audio_vectors)
-        audio_vectors = torch.stack(audio_vectors, dim=0)
-        ds = TensorDataset(audio_vectors)
-        dl = DataLoader(ds, batch_size=bs, shuffle=shuffle)
-        return dl
+            def __getitem__(self, idx):
+                audio_np = load_audio(self.data[idx]['audio'])
+                return torch.from_numpy(audio_np)
+
+        def collate_fn(batch):
+            max_length = max(len(tensor) for tensor in batch)
+            padded_batch = [torch.nn.functional.pad(tensor, (0, max_length - len(tensor)), value=0) for tensor in batch]
+            return torch.stack(padded_batch, dim=0)
+
+        dataset = AudioDataset(data)
+        dataloader = torch.utils.data.DataLoader(
+            dataset,
+            batch_size=bs,
+            shuffle=shuffle,
+            collate_fn=collate_fn
+        )
+        return dataloader
 
 
     def train_process(self, train_data, cache_dir):

@@ -7,7 +7,7 @@ import getpass
 USERNAME = getpass.getuser()
 
 
-CACHE_DIR = f'/home/sharifm/teaching/tml-0368-4075/2024-spring/students/{USERNAME}/prepend_acoustic_attack/experiments/.cache'
+CACHE_DIR = f'/home/{USERNAME}/.cache/whisper'
 
 MODEL_NAME_MAPPER = {
     'whisper-tiny'  : 'tiny.en',

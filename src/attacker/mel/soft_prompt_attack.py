@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import Dataset, DataLoader
 import random
 import os
 from tqdm import tqdm
@@ -10,6 +10,18 @@ from .base import MelBaseAttacker
 from src.tools.tools import set_seeds, AverageMeter
 
 
+class MelDataset(Dataset):
+    def __init__(self, data, audio_to_mel_fn):
+        self.data = data
+        self.audio_to_mel_fn = audio_to_mel_fn
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        audio_path = self.data[idx]['audio']
+        mel = self.audio_to_mel_fn(audio_path)
+        return mel
 
 class SoftPromptAttack(MelBaseAttacker):
     '''
@@ -33,7 +45,7 @@ class SoftPromptAttack(MelBaseAttacker):
         log_probs = torch.log(sf(logits))
         eot_probs = log_probs[:,eot_id].squeeze()
         return -1*torch.mean(eot_probs)
-    
+
     # def _regularization(self, softprompt):
     #     '''
     #         Regularization to ensure temporal smoothness of the adversarial softprompt vectors
@@ -51,15 +63,12 @@ class SoftPromptAttack(MelBaseAttacker):
         # switch to train mode
         self.softprompt_model.train()
 
-        for i, (mels) in enumerate(train_loader):
-            mels = mels[0].to(self.device)
+        for i, mels in enumerate(train_loader):
+            mels = mels.to(self.device)
 
             # Forward pass
             logits = self.softprompt_model(mels, self.whisper_model)[:,-1,:].squeeze(dim=1)
-            loss_main = self._loss(logits)
-            # loss_reg =  self._regularization(self.softprompt_model.softprompt)
-            # loss = loss_main + loss_reg
-            loss = loss_main
+            loss = self._loss(logits)
 
             # Backward pass and update
             self.optimizer.zero_grad()
@@ -67,28 +76,21 @@ class SoftPromptAttack(MelBaseAttacker):
             self.optimizer.step()
 
             if self.attack_args.clip_val != -1:
-                with torch.no_grad():  
+                with torch.no_grad():
                     self.softprompt_model.softprompt.clamp_(max=self.attack_args.clip_val)
 
             # record loss
             losses.update(loss.item(), mels.size(0))
             if i % print_freq == 0:
                 print(f'Epoch: [{epoch}][{i}/{len(train_loader)}]\tLoss {losses.val:.5f} ({losses.avg:.5f})')
-        
+
 
     def _prep_dl(self, data, bs=16, shuffle=False):
         '''
-        Create batch of mel vectors
+        Create DataLoader for mel vectors
         '''
-
-        print('Creating mel vectors from audio files')
-        mels = []
-        for d in tqdm(data):
-            mels.append(self.audio_to_mel(d['audio']))
-
-        mels = torch.stack(mels, dim=0)
-        ds = TensorDataset(mels)
-        dl = DataLoader(ds, batch_size=bs, shuffle=shuffle)
+        dataset = MelDataset(data, self.audio_to_mel)
+        dl = DataLoader(dataset, batch_size=bs, shuffle=shuffle, num_workers=4)
         return dl
 
 
@@ -122,6 +124,5 @@ class SoftPromptAttack(MelBaseAttacker):
 
 
 
-            
 
 
