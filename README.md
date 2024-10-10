@@ -99,7 +99,7 @@ An example command for evaluation is given below:
 
 An example command for processing is given below:
 
-`python process.py --attack_model_path /experiments/librispeech/whisper-tiny-multi/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/epoch40/model.th --save_path /audio_attack_segments/attack_segment.np.npy`
+`python process.py --attack_model_path experiments/librispeech/whisper-tiny-multi/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/epoch40/model.th --save_path /audio_attack_segments/attack_segment.np.npy`
 
 ### Transfer attack evaluation
 
