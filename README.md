@@ -90,6 +90,16 @@ An example command for evaluation is given below:
 
 `python eval_attack.py --model_name whisper-medium-multi --data_name librispeech --attack_method audio-raw --clip_val 0.02 --attack_size 10240 --attack_epoch 160 --not_none`
 
+## Processing audio attack segments
+
+`process.py` is used to convert the attack model state dict files to audio attack segments. These segments are stored as NumPy arrays and can be used for further adversarial attack evaluation or analysis. The arguments to the scripts are:
+
+- `--attack_model_path`: Full path to the trained attack model from which the audio attack segment will be extracted.
+- `--save_path`: Full path where the extracted audio attack segment will be saved as a NumPy array.
+
+An example command for processing is given below:
+
+`python process.py --attack_model_path experiments/librispeech/whisper-tiny-multi/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/epoch40/model.th --save_path audio_attack_segments/attack_segment.np.npy`
 
 ### Transfer attack evaluation
 
