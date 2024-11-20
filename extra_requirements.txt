@@ -1,0 +1,4 @@
+langdetect==1.0.9
+seaborn==0.13.2
+torchaudio==2.4.1
+sentence_transformers==3.3.1

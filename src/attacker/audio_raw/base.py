@@ -34,6 +34,8 @@ class AudioBaseAttacker():
             return eot_id
         elif self.attack_args.attack_token == 'transcribe':
             return self.whisper_model.tokenizer.transcribe
+        elif self.attack_args.attack_token.isnumeric():
+            return int(self.attack_args.attack_token)
 
     def evaluate_metrics(self, hyps, refs_data, metrics, frac_lang_languages, attack=False):
         refs = [d['ref'] for d in refs_data]
