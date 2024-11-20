@@ -56,14 +56,13 @@ def attack_args():
         "--attack_token",
         type=str,
         default="eot",
-        choices=["eot", "transcribe"],
         help="Which non-acoustic token are we learning an acoustic realization for.",
     )
     commandLineParser.add_argument(
         "--attack_command",
         type=str,
         default="mute",
-        choices=["mute", "hallucinate", "translate"],
+        choices=["mute", "hallucinate", "translate", "arbitrary"],
         help="Objective of attack - hidden universal command/control.",
     )
     commandLineParser.add_argument(

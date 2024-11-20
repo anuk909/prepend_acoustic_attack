@@ -22,7 +22,7 @@ def select_train_attacker(attack_args, core_args, model, word_list=None, device=
         multiple_model_attack = False
         if len(core_args.model_name) > 1:
             multiple_model_attack = True
-        if attack_args.attack_command == 'mute':
+        if attack_args.attack_command == 'mute' or attack_args.attack_command == 'arbitrary':
             return AudioAttack(attack_args, model, device, lr=attack_args.lr, multiple_model_attack=multiple_model_attack, attack_init=attack_args.attack_init)
         elif attack_args.attack_command == 'hallucinate':
             return AudioAttackHallucinate(attack_args, model, device, lr=attack_args.lr, multiple_model_attack=multiple_model_attack, attack_init=attack_args.attack_init)
