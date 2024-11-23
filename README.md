@@ -1,34 +1,17 @@
 # Overview
 
-This is the offical codebase for the Paper _Muting Whisper: A Universal Acoustic Adversarial Attack on Speech Foundation Models_
+This directory contains the final attack segments created for the project "Confusing Whisper: Universal Acoustic Adversarial Attacks on Speech Foundation Models." 
+These segments exploit vulnerabilities in Whisper models by leveraging a learned acoustic realization of specific tokens (e.g., <fr> <startoflm> <ru>). When prepended to any speech signal, these segments effectively manipulate the model's behavior, made the infferce time longger or change the behivor of the model .
 
 ## Abstract
-Recent developments in large speech foundation models like Whisper have led to their widespread use in many automatic speech recognition (ASR) applications. These systems incorporate _special tokens_ in their vocabulary, such as `<endoftext>`, to guide their language generation process. However, we demonstrate that these tokens can be exploited by adversarial attacks to manipulate the model's behavior. We propose a simple yet effective method to learn a universal acoustic realization of Whisper's `<endoftext>` token, which, when prepended to any speech signal, encourages the model to ignore the speech and only transcribe the special token, effectively _muting_ the model. Our experiments demonstrate that the same, universal 0.64-second adversarial audio segment can successfully mute a target Whisper ASR model for over 97% of speech samples. Moreover, we find that this universal adversarial audio segment often transfers to new datasets and tasks. Overall this work demonstrates the vulnerability of Whisper models to _muting_ adversarial attacks, where such attacks can pose both risks and potential benefits in real-world settings: for example the attack can be used to bypass speech moderation systems, or conversely the attack can also be used to protect private speech data.
+Recent developments in large speech foundation models like Whisper have led to their widespread use in many automatic speech recognition (ASR) applications. These systems incorporate _special tokens_ in their vocabulary, such as `<endoftext>`, to guide their language generation process.
+was exploited by learning a universal acoustic realization of the token, which, when prepended to any speech signal, caused the model to ignore the input and transcribe only the token. This effectively "muted" the model, achieving a success rate of over 97% in silencing unseen speech inputs.
+In our project, we extend this concept by exploring the vulnerabilities of other special tokens, particularly language tokens such as <ru> (Russian) and <fr> (French). These tokens are critical for guiding Whisper’s transcription process in multi-lingual settings. By targeting these tokens, we test the model's susceptibility to adversarial manipulation in diverse scenarios, including language-specific transcription and translation tasks. Additionally, we experimented with other tokens, such as <startoflm>, to examine how the attack behaves when targeting tokens associated with initiating tasks or guiding the model's behavior. This broader investigation provides deeper insights into Whisper's vulnerabilities and the transferability of adversarial attacks across a variety of tokens and tasks.
 
-# Try it out
-
-We have uploaded all the pre-learnt universal acoustic adversarial attack segments in   `./audio_attacks/`. Open `demo.ipynb` and try evaluating them for yourself. Observe how these attacks can successfully mute Whisper models for unseen speech signals.
-
-# Quick Start (Running the Code)
-
-
-The following subsections give example commands to run the training, evaluations and analysis necessary to reproduce the results in our paper.
-
-In the paper, `tiny`, `base`, `small` and `medium` refer to the multi-lingual versions of the Whisper models, whilst `tiny.en`, `base.en`, `small.en` and `medium.en` refer to the English-only versions of the Whisper Models (this is the nomenclature used in the original Whisper paper). However, we use a slightly different naming convention in the codebase when specifying the model name as an argument to the scripts. The Table below gives the mapping from the names used in the paper and the equivalent names used in the codebase.
-
-| Model name in paper | `model_name` in codebase |
-| --------------- | ------------------- |
-| tiny.en | whisper-tiny |
-| tiny | whisper-tiny-multi |
-| base.en | whisper-base |
-| base | whisper-base-multi |
-| small.en | whisper-small |
-| small | whisper-small-multi |
-| medium.en | whisper-medium |
-| medium | whisper-medium-multi |
-
-
-
+# Quick Start (Running the Code of innfernce )
+We have uploaded all the pre-learnt universal acoustic adversarial attack segments in   `audio_attack_segments/arbitrary_tokens`. 
+Open `evaluate_arbitrary_attack.ipynb ` and try evaluating them for yourself. observe how these attacks impact on the opreation of the modal. 
+examples
 ## Package Installation
 
 This code has been tested on python>=3.9.
@@ -47,9 +30,80 @@ conda activate venv_gector
 pip install -r extra_requirements.txt
 ```
 
-## Standard Arguments for Attack Configuration
+# Learning a universal prepend acoustic attack# Attack Segments Documentation
 
-You can see all the arguments used in the different scripts in `src/tools/args.py`.
+to repdruce our results this opertation need to be done :
+1. run the script `train_attack' with the proper  aruggemtns for attack_token 
+2. run the `process.py` script with the correct parameters for `attack_model_path` and `save_path`.
+
+
+## Generation Commands
+
+### `attack_segment_fr.np.npy`
+```bash
+python train_attack.py \
+    --model_name whisper-tiny-multi \
+    --data_name librispeech \
+    --attack_method audio-raw \
+    --attack_command arbitrary \
+    --attack_token 50265 \
+    --max_epochs 40 \
+    --clip_val 0.02 \
+    --attack_size 10240 \
+    --save_freq 10
+```
+
+### `attack_segment_ru.np.npy`
+```bash
+python train_attack.py \
+    --model_name whisper-tiny-multi \
+    --data_name librispeech \
+    --attack_method audio-raw \
+    --attack_command arbitrary \
+    --attack_token 50263 \
+    --max_epochs 40 \
+    --clip_val 0.02 \
+    --attack_size 10240 \
+    --save_freq 10
+```
+
+### `attack_segment_a.np.npy`
+```bash
+python train_attack.py \
+    --model_name whisper-tiny-multi \
+    --data_name librispeech \
+    --attack_method audio-raw \
+    --attack_command arbitrary \
+    --attack_token 64 \
+    --max_epochs 40 \
+    --clip_val 0.02 \
+    --attack_size 10240 \
+    --save_freq 10
+```
+
+### `attack_segment_slm.np.npy`
+```bash
+python train_attack.py \
+    --model_name whisper-tiny-multi \
+    --data_name librispeech \
+    --attack_method audio-raw \
+    --attack_command arbitrary \
+    --attack_token 50360 \
+    --max_epochs 40 \
+    --clip_val 0.02 \
+    --attack_size 10240 \
+    --save_freq 10
+```
+The following subsections give example commands to run the training, evaluations and analysis necessary to reproduce the results in our paper.
+
+## Standard Arguments for Attack Configuration
+train_attack.py can be used to learn a universal acoustic attack on any of the Whisper models. The following extra arguments may be of use:
+
+- `max_epochs` : Maximum number of epochs to run the gradient-descent based training to learn the universal attack. In the paper we have the following configurations: tiny (40), base (40), small (120) and medium (160).
+- `bs` : The batch size for learning the attack
+- `save_freq` : The frequency of saving the learnt attack audio segment during the learning of the attack.
+
+You can also  see all the arguments used in the different scripts in `src/tools/args.py`.
 
 The following arguments specify the attack configuration:
 
@@ -61,80 +115,15 @@ The following arguments specify the attack configuration:
 - `task` : This can either be `transcribe` or `translate`. This specifies the task that the Whisper model is required to do. Note that `translate` is only possible for the multi-lingual models.
 - `language`: The source audio language. By default is `en`.
 
-## Learning a universal prepend acoustic attack
+In the paper, `tiny`, `base`, `small` and `medium` refer to the multi-lingual versions of the Whisper models, whilst `tiny.en`, `base.en`, `small.en` and `medium.en` refer to the English-only versions of the Whisper Models (this is the nomenclature used in the original Whisper paper). However, we use a slightly different naming convention in the codebase when specifying the model name as an argument to the scripts. The Table below gives the mapping from the names used in the paper and the equivalent names used in the codebase.
 
-`train_attack.py` can be used to learn a universal acoustic attack on any of the Whisper models. The following extra arguments may be of use:
-
-- `max_epochs` : Maximum number of epochs to run the gradient-descent based training to learn the universal attack. In the paper we have the following configurations: tiny (40), base (40), small (120) and medium (160).
-- `bs` : The batch size for learning the attack
-- `save_freq` : The frequency of saving the learnt attack audio segment during the learning of the attack.
-
-An example command for learning an attack is given below.
-
-`python train_attack.py --model_name whisper-base-multi --data_name librispeech --attack_method audio-raw --max_epochs 40 --clip_val 0.02 --attack_size 10240 --save_freq 10`
-
-## Evaluating a universal prepend acoustic attack
-
-`eval_attack.py` is used to evaluate the efficacy of the attacks. Running the evaluation script evaluates the _no attack_ setting (the test audio samples are not modified) and the _attack_ setting (the test audio samples have the universal acoustic attack segment prepended in the raw audio space). For each setting, two metrics are reported:
-
-1. **NSL** (Negative Sequence Length) - The (negative) average sequence length in words of the model predictions. The adversary aims to maximize this (as close to 0 as possible).
-2. **frac 0** - The fraction of test samples for which the predicted sequence length was of length 0. This represents the fraction of _fully successful_ adversarial attacks, as the universal attack successfully _mutes_ the Whisper model at test time on these unseen test samples.
-
-During evaluation the following extra arguments may be of use:
-
-- `attack_epoch` : Each universal attack is trained for multiple epochs (until `max_epochs`). This argument allows you to select which trained version of the attack to evaluate. Note that you would have to set an appropriate `save_freq` for the trained universal attack segment to be saved at the selected `attack_epoch`
-  
-- `not-none` : Simply pass this argument if you do not want the evaluation script to evaluate the _no attack_ setting.
-
-An example command for evaluation is given below:
-
-`python eval_attack.py --model_name whisper-medium-multi --data_name librispeech --attack_method audio-raw --clip_val 0.02 --attack_size 10240 --attack_epoch 160 --not_none`
-
-## Processing audio attack segments
-
-`process.py` is used to convert the attack model state dict files to audio attack segments. These segments are stored as NumPy arrays and can be used for further adversarial attack evaluation or analysis. The arguments to the scripts are:
-
-- `--attack_model_path`: Full path to the trained attack model from which the audio attack segment will be extracted.
-- `--save_path`: Full path where the extracted audio attack segment will be saved as a NumPy array.
-
-An example command for processing is given below:
-
-`python process.py --attack_model_path experiments/librispeech/whisper-tiny-multi/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/epoch40/model.th --save_path audio_attack_segments/attack_segment.np.npy`
-
-### Transfer attack evaluation
-
-Beyond just evaluating the learnt universal adversarial attacks in the _matched_ setting, where the same dataset (attack is learnt on the validation split and evaluated on the test split) and same model are used, we can also evaluate how well the attack _transfers_ to different datasets and even tasks.
-
-To evaluate the transferability the following further arguments are required:
-
-- `transfer` : Simply pass this flag to indicate it is a transferability experiment
-
-- `attack_model_dir` : This specifies the path to the model directory with the saved model wrapper containing the learnt universal attack segment. During training these directories and paths are automatically created. Refer to the example below to see the typical structure of these paths.
-
-The below example looks at the transferability of an attack learnt on _librispeech_ to the _tedlium_ dataset.
-
-`python eval_attack.py --model_name whisper-medium --data_name tedlium --attack_method audio-raw --attack_epoch 160 --attack_size 10240 --transfer --attack_model_dir experiments/librispeech/whisper-medium/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/ --not_none`
-
-
-The next examples looks at the transferability of an attack learnt on _librispeech_ for the _transcribe_ task, to the _fleurs_ French dataset for the _translate_ task.
-
-`python eval_attack.py --model_name whisper-tiny-multi --data_name fleurs --attack_size 10240 --language fr --task translate --attack_method audio-raw --attack_epoch 40 --transfer --attack_model_dir experiments/librispeech/whisper-tiny-multi/transcribe/en/attack_train/audio-raw/attack_size10240/clip_val0.02/prepend_attack_models/ --not_none`
-
-
-## Analysis
-
-Various forms of analysis are conducted in the paper. Here we give the commands used to generate the numbers given in the paper.
-
-
-# Data
-
-Describe here how certain datasets need to pre-downloaded and stored in particular directory. Also specify which part of the code needs to be updated to point to this directory.
-
-# Results
-
-include results and graphs here
-
-
-# Citation
-
-If you use this codebase, please cite our work.
+| Model name in paper | `model_name` in codebase |
+| --------------- | ------------------- |
+| tiny.en | whisper-tiny |
+| tiny | whisper-tiny-multi |
+| base.en | whisper-base |
+| base | whisper-base-multi |
+| small.en | whisper-small |
+| small | whisper-small-multi |
+| medium.en | whisper-medium |
+| medium | whisper-medium-multi |
